@@ -1,0 +1,21 @@
+{
+  "name": "jwtgen",
+  "version": "1.0.0",
+  "description": "JWT key generator",
+  "keywords":[ "JWT", "generator", "JSON", "token" ],
+  "repository": {
+    "type" : "git",
+    "url" : "https://github.com/vandium-io/jwtgen.git"
+  },
+  "main": "./jwtgen.js",
+  "bin": {
+    "jwtgen" : "./jwtgen.js"
+  },
+  "author": "Richard Hyatt",
+  "license" : "BSD-3-Clause",
+  "dependencies": {
+    "jwt-simple": "^0.4.1",
+    "lodash": "^4.6.1",
+    "yargs": "^4.2.0"
+  }
+}
