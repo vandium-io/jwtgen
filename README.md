@@ -1,6 +1,6 @@
 # jwtgen
 
-Command line tool that generates JWT tokens assist in testing applications.
+Command line tool that generates JWT tokens that helps in the testing of applications.
 
 ## Features
 * Signatures for HMAC-SHA256, HMAC-SHA384, HMAC-SHA512 and RSA-SHA256
