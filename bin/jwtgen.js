@@ -2,25 +2,23 @@
 
 'use strict';
 
-var _ = require( 'lodash' );
+const _ = require( 'lodash' );
 
-var fs = require( 'fs' );
+const yargs = require( 'yargs' );
 
-var yargs = require( 'yargs' );
+const jwtBuilder = require( 'jwt-builder' );
 
-var jwt = require( 'jwt-simple' );
+const argv = yargs.usage( 'Usage: $0 [options]' )
 
-var argv = yargs.usage( 'Usage: $0 [options]' )
-            
     .demand( 'a' )
     .describe( 'a', 'algorithm' )
     .choices( 'a', [ 'HS256', 'HS384', 'HS512', 'RS256' ] )
     .alias( 'a', 'algorithm' )
-    
+
     .describe( 's', 'secret value for HMAC algorithm' )
     .alias( 's', 'secret' )
     .string( 's' )
-    
+
     .describe( 'p', 'private key file (required for RS256 algorithm)' )
     .alias( 'p', 'private' )
     .string( 'p' )
@@ -65,16 +63,6 @@ function log( message ) {
     }
 }
 
-function getPrivateKey() {
-
-    return fs.readFileSync( argv.p );
-}
-
-function addClaim( claims, key, value ) {
-
-    claims[ key.trim() ] = value.trim();
-}
-
 function buildClaims() {
 
     if( argv.claims ) {
@@ -82,51 +70,49 @@ function buildClaims() {
         return JSON.parse( argv.claims );
     }
 
-    var claimsList = [];
+    let claimsList = [];
 
-    if( _.isArray( argv.c ) ) {
+    let claims = {};
 
-        claimsList = argv.c;
-    }
-    else {
+    if( argv.c ) {
 
-        claimsList = [ argv.c ];
-    }
+        if( _.isArray( argv.c ) ) {
 
-    var claims = {};
+            claimsList = argv.c;
+        }
+        else {
 
-    _.forEach( claimsList, function( claim ) {
-
-        var parts = _.split( claim, '=' );
-
-        if( parts.length !== 2 ) {
-
-            console.error( 'invalid claim: ' + claim );
+            claimsList = [ argv.c ];
         }
 
-        claims[ parts[0].trim() ] = parts[1].trim();
-    });
+        claimsList.forEach( function( claim ) {
+
+            let parts = claim.split( '=' );
+
+            if( parts.length !== 2 ) {
+
+                console.error( 'invalid claim: ' + claim );
+            }
+
+            claims[ parts[0].trim() ] = parts[1].trim();
+        });
+    }
 
     return claims;
 }
 
-var claims = buildClaims();
+let builder = jwtBuilder();
 
-if( argv.i < 0 ) {
+builder.claims( buildClaims() );
 
-    claims.iat = Math.floor((Date.now()/1000) + argv.i);
-}
-else {
-
-    claims.iat = Math.floor( argv.i );
-}
+builder.iat( argv.i );
 
 if( argv.e ) {
 
-    claims.exp = claims.iat + Math.floor( argv.e );
+    builder.exp( argv.e );
 }
 
-var token;
+builder.algorithm( argv.a );
 
 if( argv.a === 'RS256' ) {
 
@@ -135,7 +121,7 @@ if( argv.a === 'RS256' ) {
         exitError( 'private key missing' );
     }
 
-    token = jwt.encode( claims, getPrivateKey(), argv.a );
+    builder.privateKeyFromPath( argv.p );
 }
 else {
 
@@ -144,8 +130,12 @@ else {
         exitError( 'secret value missing' );
     }
 
-    token = jwt.encode( claims, argv.s, argv.a );
+    builder.secret( argv.s );
 }
+
+let token = builder.build();
+
+let claims = JSON.parse( new Buffer( token.split( '.' )[1], 'base64' ).toString() );
 
 log( 'algorithm: ' + argv.a );
 
@@ -157,6 +147,7 @@ log( JSON.stringify( claims, null, 2 ) );
 log( '' );
 
 log( 'token:' );
+
 console.log( token );
 
 process.exit( 0 );

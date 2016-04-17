@@ -1,0 +1,12 @@
+{
+  "node": true,
+  "undef": true,
+  "unused": true,
+  "asi": true,
+  "globals": {
+  	  "Promise": true
+  },
+  "mocha": true,
+  "predef": [ "-Promise" ],
+  "esversion": 6
+}
