@@ -32,6 +32,13 @@ var argv = yargs.usage( 'Usage: $0 [options]' )
     .describe( 'claims', 'JSON string containing claims' )
     .string( 'claims' )
 
+    .describe( 'h', 'header in the form [key=value]' )
+    .alias( 'h', 'header' )
+    .string( 'h' )
+
+    .describe( 'headers', 'JSON string containing additional headers' )
+    .string( 'headers' )
+
     .describe( 'i', 'issued at (iat) in seconds from the UNIX epoch' )
     .alias( 'i', 'iat' )
     .default( 'i', Math.floor(Date.now()/1000), 'now' )
@@ -110,6 +117,41 @@ function buildClaims() {
     return claims;
 }
 
+function buildHeaders() {
+
+    if( argv.headers ) {
+
+        return JSON.parse( argv.headers );
+    }
+
+    var headersList = [];
+
+    if( _.isArray( argv.h ) ) {
+
+        headersList = argv.h;
+    }
+    else if (argv.h) {
+
+        headersList = [ argv.h ];
+    }
+
+    var headers = {};
+
+    _.forEach( headersList, function( header ) {
+
+        var parts = _.split( header, '=' );
+
+        if( parts.length !== 2 ) {
+
+            console.error( 'invalid claim: ' + header );
+        }
+
+        headers[ parts[0].trim() ] = parts[1].trim();
+    });
+
+    return headers;
+}
+
 var claims = buildClaims();
 
 if( argv.i < 0 ) {
@@ -126,6 +168,8 @@ if( argv.e ) {
     claims.exp = claims.iat + Math.floor( argv.e );
 }
 
+var headers = buildHeaders();
+
 var token;
 
 if( argv.a === 'RS256' ) {
@@ -135,7 +179,7 @@ if( argv.a === 'RS256' ) {
         exitError( 'private key missing' );
     }
 
-    token = jwt.encode( claims, getPrivateKey(), argv.a );
+    token = jwt.encode( claims, getPrivateKey(), argv.a, { header: headers } );
 }
 else {
 
@@ -144,10 +188,15 @@ else {
         exitError( 'secret value missing' );
     }
 
-    token = jwt.encode( claims, argv.s, argv.a );
+    token = jwt.encode( claims, argv.s, argv.a, { header: headers } );
 }
 
 log( 'algorithm: ' + argv.a );
+
+log( '' );
+
+log( 'headers: ' );
+log( JSON.stringify( headers, null, 2 ) );
 
 log( '' );
 
