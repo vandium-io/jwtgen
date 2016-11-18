@@ -16,7 +16,11 @@
   "engines": {
     "node": ">=4.3.2"
   },
-  "main": "./index.js",
+  "main": "./bin/index.js",
+  "scripts": {
+    "test": "./node_modules/.bin/mocha --recursive",
+    "coverage": "./node_modules/.bin/istanbul cover node_modules/mocha/bin/_mocha -- -R spec --recursive"
+  },
   "bin": {
     "jwtgen": "./bin/jwtgen.js"
   },
@@ -31,6 +35,7 @@
     "chai": "^3.5.0",
     "istanbul": "^0.4.3",
     "mocha": "^2.4.5",
+    "proxyquire": "^1.7.10",
     "sinon": "^1.17.3"
   }
 }

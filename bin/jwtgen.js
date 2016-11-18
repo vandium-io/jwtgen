@@ -30,6 +30,13 @@ const argv = yargs.usage( 'Usage: $0 [options]' )
     .describe( 'claims', 'JSON string containing claims' )
     .string( 'claims' )
 
+    .describe( 'h', 'header in the form [key=value]' )
+    .alias( 'h', 'header' )
+    .string( 'h' )
+
+    .describe( 'headers', 'JSON string containing additional headers' )
+    .string( 'headers' )
+
     .describe( 'i', 'issued at (iat) in seconds from the UNIX epoch' )
     .alias( 'i', 'iat' )
     .default( 'i', Math.floor(Date.now()/1000), 'now' )
@@ -91,7 +98,7 @@ function buildClaims() {
 
             if( parts.length !== 2 ) {
 
-                console.error( 'invalid claim: ' + claim );
+                exitError( 'invalid claim: ' + claim );
             }
 
             claims[ parts[0].trim() ] = parts[1].trim();
@@ -101,7 +108,44 @@ function buildClaims() {
     return claims;
 }
 
+function buildHeaders() {
+
+    if( argv.headers ) {
+
+        return JSON.parse( argv.headers );
+    }
+
+    var headersList = [];
+
+    if( _.isArray( argv.h ) ) {
+
+        headersList = argv.h;
+    }
+    else if( argv.h ) {
+
+        headersList = [ argv.h ];
+    }
+
+    var headers = {};
+
+    _.forEach( headersList, function( header ) {
+
+        var parts = _.split( header, '=' );
+
+        if( parts.length !== 2 ) {
+
+            exitError( 'invalid header: ' + header );
+        }
+
+        headers[ parts[0].trim() ] = parts[1].trim();
+    });
+
+    return headers;
+}
+
 let builder = jwtBuilder();
+
+builder.headers( buildHeaders() );
 
 builder.claims( buildClaims() );
 
@@ -137,12 +181,19 @@ let token = builder.build();
 
 let claims = JSON.parse( new Buffer( token.split( '.' )[1], 'base64' ).toString() );
 
+let headers = JSON.parse( new Buffer( token.split( '.')[0], 'base64' ).toString() );
+
 log( 'algorithm: ' + argv.a );
 
 log( '' );
 
 log( 'claims: ' );
 log( JSON.stringify( claims, null, 2 ) );
+
+log( '' );
+
+log( 'headers: ' );
+log( JSON.stringify( headers, null, 2 ) );
 
 log( '' );
 
