@@ -1,3 +1,6 @@
+[![Build Status](https://travis-ci.org/vandium-io/jwtgen.svg?branch=master)](https://travis-ci.org/vandium-io/jwtgen)
+[![npm version](https://badge.fury.io/js/jwtgen.svg)](https://badge.fury.io/js/jwtgen)
+
 # jwtgen
 
 Command line tool that generates JWT tokens that helps in the testing of applications.
