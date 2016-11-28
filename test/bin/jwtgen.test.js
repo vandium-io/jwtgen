@@ -7,8 +7,6 @@ const proxyquire = require( 'proxyquire' ).noCallThru();
 
 const sinon = require( 'sinon' );
 
-const jwt = require( 'jwt-simple' );
-
 const MODULE_PATH = process.env.PWD + '/bin/jwtgen';
 
 const SAMPLE_TOKEN =
