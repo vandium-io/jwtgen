@@ -101,7 +101,14 @@ function buildClaims() {
                 exitError( 'invalid claim: ' + claim );
             }
 
-            claims[ parts[0].trim() ] = parts[1].trim();
+            try {
+
+                claims[ parts[0].trim() ] = JSON.parse( parts[1].trim() );
+            }
+            catch( e ) {
+
+                claims[ parts[0].trim() ] = parts[1].trim();
+            }
         });
     }
 

@@ -291,6 +291,52 @@ describe( MODULE_PATH, function() {
         expect( token.claims.iss ).to.equal( 'user123' );
     });
 
+    it( 'claim that is an array', function() {
+
+        yargsStub.argv = {
+
+            a: 'HS256',
+            s: 'my-secret',
+            c: 'roles=["ROLE_ADMIN","ROLE_USER"]'
+        };
+
+        let consoleLogStub = sinon.stub( console, 'log' );
+
+        proxyquire( MODULE_PATH, {
+
+            'yargs': yargsStub
+        });
+
+        console.log.restore();
+
+        let token = decodeToken( consoleLogStub.firstCall.args[ 0 ] );
+
+        expect( token.claims.roles ).to.eql( [ "ROLE_ADMIN", "ROLE_USER" ] );
+    });
+
+    it( 'claim that is an object', function() {
+
+        yargsStub.argv = {
+
+            a: 'HS256',
+            s: 'my-secret',
+            c: 'roles={"type":"ROLE_ADMIN","name":"myRole"}'
+        };
+
+        let consoleLogStub = sinon.stub( console, 'log' );
+
+        proxyquire( MODULE_PATH, {
+
+            'yargs': yargsStub
+        });
+
+        console.log.restore();
+
+        let token = decodeToken( consoleLogStub.firstCall.args[ 0 ] );
+
+        expect( token.claims.roles ).to.eql( { "type": "ROLE_ADMIN", "name": "myRole" } );
+    });
+
     it( 'error: invalid claim', function() {
 
         yargsStub.argv = {
