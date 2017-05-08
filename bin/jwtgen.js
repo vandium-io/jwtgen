@@ -8,6 +8,8 @@ const yargs = require( 'yargs' );
 
 const jwtBuilder = require( 'jwt-builder' );
 
+const fs = require( 'fs' );
+
 const argv = yargs.usage( 'Usage: $0 [options]' )
 
     .demand( 'a' )
@@ -172,7 +174,8 @@ if( argv.a === 'RS256' ) {
         exitError( 'private key missing' );
     }
 
-    builder.privateKeyFromPath( argv.p );
+    var keyData = fs.readFileSync( argv.p ).toString();
+    builder.privateKey( keyData );
 }
 else {
 
