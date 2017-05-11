@@ -1,5 +1,17 @@
 # Change Log
 
+## 2.1.1 (2017-5-11)
+
+### Fixes:
+
+* Fixed issue with reading in private key for RS256
+
+### Internal:
+
+* Better error handling
+
+* Tests use actual private key file
+
 ## 2.1.0 (2017-04-19)
 
 ### New:

@@ -98,7 +98,7 @@ function buildClaims() {
 
             if( parts.length !== 2 ) {
 
-                exitError( 'invalid claim: ' + claim );
+                throw new Error( 'invalid claim: ' + claim );
             }
 
             try {
@@ -141,7 +141,7 @@ function buildHeaders() {
 
         if( parts.length !== 2 ) {
 
-            exitError( 'invalid header: ' + header );
+            throw new Error( 'invalid header: ' + header );
         }
 
         headers[ parts[0].trim() ] = parts[1].trim();
@@ -152,9 +152,16 @@ function buildHeaders() {
 
 let builder = jwtBuilder();
 
-builder.headers( buildHeaders() );
+try {
 
-builder.claims( buildClaims() );
+    builder.headers( buildHeaders() );
+
+    builder.claims( buildClaims() );
+}
+catch( err ) {
+
+    return exitError( err.message );
+}
 
 builder.iat( argv.i );
 
@@ -169,16 +176,16 @@ if( argv.a === 'RS256' ) {
 
     if( !argv.p ) {
 
-        exitError( 'private key missing' );
+        return exitError( 'private key missing' );
     }
 
-    builder.privateKeyFromPath( argv.p );
+    builder.privateKeyFromFile( argv.p );
 }
 else {
 
     if( !argv.s ) {
 
-        exitError( 'secret value missing' );
+        return exitError( 'secret value missing' );
     }
 
     builder.secret( argv.s );

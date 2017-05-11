@@ -1,6 +1,6 @@
 {
   "name": "jwtgen",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "JWT key generator",
   "keywords": [
     "JWT",
@@ -32,6 +32,7 @@
     "yargs": "^4.2.0"
   },
   "devDependencies": {
+    "app-root-path": "^2.0.1",
     "chai": "^3.5.0",
     "istanbul": "^0.4.3",
     "mocha": "^3.2.0",

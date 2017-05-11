@@ -7,12 +7,7 @@ const proxyquire = require( 'proxyquire' ).noCallThru();
 
 const sinon = require( 'sinon' );
 
-const MODULE_PATH = process.env.PWD + '/bin/jwtgen';
-
-const SAMPLE_TOKEN =
-    'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.' +
-    'eyJpYXQiOjE0Nzk0MjAyNjh9.' +
-    'fvnfV_5cKYcxCGiXSithIVdy-ajBUTssBXe6ge05d5o';
+const appRoot = require( 'app-root-path' );
 
 function decodeToken( token ) {
 
@@ -27,7 +22,7 @@ function decodeToken( token ) {
     };
 }
 
-describe( MODULE_PATH, function() {
+describe( 'bin/jwtgen', function() {
 
     let yargsStub;
 
@@ -68,7 +63,7 @@ describe( MODULE_PATH, function() {
 
         let consoleLogStub = sinon.stub( console, 'log' );
 
-        proxyquire( MODULE_PATH, {
+        proxyquire( '../../bin/jwtgen', {
 
             'yargs': yargsStub
         });
@@ -92,7 +87,7 @@ describe( MODULE_PATH, function() {
 
         let consoleLogStub = sinon.stub( console, 'log' );
 
-        proxyquire( MODULE_PATH, {
+        proxyquire( '../../bin/jwtgen', {
 
             'yargs': yargsStub
         });
@@ -109,32 +104,22 @@ describe( MODULE_PATH, function() {
         yargsStub.argv = {
 
             a: 'RS256',
-            p: '/path/to/a/file'
+            p: appRoot + '/test/bin/assets/key.pem'
         };
 
-        let buildStub = sinon.stub().returns( SAMPLE_TOKEN );
-        let privateKeyFromPathStub = sinon.stub();
+        let consoleLogStub = sinon.stub( console, 'log' );
 
-        sinon.stub( console, 'log' ); // makes output more elegant
+        proxyquire( '../../bin/jwtgen', {
 
-        proxyquire( MODULE_PATH, {
-
-            'yargs': yargsStub,
-            'jwt-builder': sinon.stub().returns({
-
-                headers: sinon.stub(),
-                claims: sinon.stub(),
-                iat: sinon.stub(),
-                algorithm: sinon.stub(),
-                privateKeyFromPath: privateKeyFromPathStub,
-                build: buildStub
-            })
+            'yargs': yargsStub
         });
 
         console.log.restore();
 
-        expect( privateKeyFromPathStub.withArgs( '/path/to/a/file' ).calledOnce ).to.be.true;
-        expect( buildStub.calledOnce ).to.be.true;
+        let token = decodeToken( consoleLogStub.firstCall.args[ 0 ] );
+
+        expect( token.headers ).to.eql( { typ: 'JWT', alg: 'RS256' } );
+        expect( token.claims.iat ).to.equal( Math.floor( Date.now() / 1000 ) );
     });
 
     it( 'error: RS256 with no private key', function() {
@@ -144,26 +129,13 @@ describe( MODULE_PATH, function() {
             a: 'RS256'
         };
 
-        let buildStub = sinon.stub().returns( SAMPLE_TOKEN );
-
-        sinon.stub( console, 'log' ); // makes output more elegant
         let consoleErrorStub = sinon.stub( console, 'error' );
 
-        proxyquire( MODULE_PATH, {
+        proxyquire( '../../bin/jwtgen', {
 
-            'yargs': yargsStub,
-            'jwt-builder': sinon.stub().returns({
-
-                headers: sinon.stub(),
-                claims: sinon.stub(),
-                iat: sinon.stub(),
-                algorithm: sinon.stub(),
-                privateKeyFromPath: sinon.stub(),
-                build: buildStub
-            })
+            'yargs': yargsStub
         });
 
-        console.log.restore();
         console.error.restore();
 
         expect( consoleErrorStub.withArgs( 'private key missing' ).calledOnce ).to.be.true;
@@ -178,26 +150,18 @@ describe( MODULE_PATH, function() {
             a: 'HS256'
         };
 
-        try {
+        let consoleErrorStub = sinon.stub( console, 'error' );
 
-            sinon.stub( console, 'error' );
+        proxyquire( '../../bin/jwtgen', {
 
-            proxyquire( MODULE_PATH, {
+            'yargs': yargsStub
+        });
 
-                'yargs': yargsStub
-            });
+        console.error.restore();
 
-            throw new Error( 'error should have been thrown when secret was not supplied' );
-        }
-        catch( err ) {
-
-            console.error.restore();
-
-            expect( err.name ).to.equal( 'Error' );
-            expect( err.message ).to.equal( 'missing secret' );
-            expect( yargsStub.showHelp.calledOnce ).to.be.true;
-            expect( processExitStub.withArgs( 1 ).calledOnce ).to.be.true;
-        }
+        expect( consoleErrorStub.withArgs( 'secret value missing' ).calledOnce ).to.be.true;
+        expect( yargsStub.showHelp.calledOnce ).to.be.true;
+        expect( processExitStub.withArgs( 1 ).calledOnce ).to.be.true;
     });
 
     it( 'verbose operation', function() {
@@ -211,7 +175,7 @@ describe( MODULE_PATH, function() {
 
         consoleLogStub = sinon.stub( console, 'log' );
 
-        proxyquire( MODULE_PATH, {
+        proxyquire( '../../bin/jwtgen', {
 
             'yargs': yargsStub
         });
@@ -232,7 +196,7 @@ describe( MODULE_PATH, function() {
 
         let consoleLogStub = sinon.stub( console, 'log' );
 
-        proxyquire( MODULE_PATH, {
+        proxyquire( '../../bin/jwtgen', {
 
             'yargs': yargsStub
         });
@@ -255,7 +219,7 @@ describe( MODULE_PATH, function() {
 
         let consoleLogStub = sinon.stub( console, 'log' );
 
-        proxyquire( MODULE_PATH, {
+        proxyquire( '../../bin/jwtgen', {
 
             'yargs': yargsStub
         });
@@ -279,7 +243,7 @@ describe( MODULE_PATH, function() {
 
         let consoleLogStub = sinon.stub( console, 'log' );
 
-        proxyquire( MODULE_PATH, {
+        proxyquire( '../../bin/jwtgen', {
 
             'yargs': yargsStub
         });
@@ -302,7 +266,7 @@ describe( MODULE_PATH, function() {
 
         let consoleLogStub = sinon.stub( console, 'log' );
 
-        proxyquire( MODULE_PATH, {
+        proxyquire( '../../bin/jwtgen', {
 
             'yargs': yargsStub
         });
@@ -325,7 +289,7 @@ describe( MODULE_PATH, function() {
 
         let consoleLogStub = sinon.stub( console, 'log' );
 
-        proxyquire( MODULE_PATH, {
+        proxyquire( '../../bin/jwtgen', {
 
             'yargs': yargsStub
         });
@@ -339,33 +303,27 @@ describe( MODULE_PATH, function() {
 
     it( 'error: invalid claim', function() {
 
+        let claim = 'noEqualsSign';
+
         yargsStub.argv = {
 
             a: 'HS256',
             s: 'my-secret',
-            c: 'noEqualsSign'
+            c: claim
         };
 
-        try {
+        let consoleErrorStub = sinon.stub( console, 'error' );
 
-            sinon.stub( console, 'error' );
+        proxyquire( '../../bin/jwtgen', {
 
-            proxyquire( MODULE_PATH, {
+            'yargs': yargsStub
+        });
 
-                'yargs': yargsStub
-            });
+        console.error.restore();
 
-            throw new Error( 'error should have been thrown when the invalid claim could not be parsed' );
-        }
-        catch( err ) {
-
-            console.error.restore();
-
-            expect( err.name ).to.equal( 'TypeError' );
-            expect( err.message ).to.equal( "Cannot read property 'trim' of undefined" );
-            expect( yargsStub.showHelp.calledOnce ).to.be.true;
-            expect( processExitStub.withArgs( 1 ).calledOnce ).to.be.true;
-        }
+        expect( consoleErrorStub.withArgs( 'invalid claim: ' + claim ).calledOnce ).to.be.true;
+        expect( yargsStub.showHelp.calledOnce ).to.be.true;
+        expect( processExitStub.withArgs( 1 ).calledOnce ).to.be.true;
     });
 
     it( 'single header', function() {
@@ -379,7 +337,7 @@ describe( MODULE_PATH, function() {
 
         let consoleLogStub = sinon.stub( console, 'log' );
 
-        proxyquire( MODULE_PATH, {
+        proxyquire( '../../bin/jwtgen', {
 
             'yargs': yargsStub
         });
@@ -402,7 +360,7 @@ describe( MODULE_PATH, function() {
 
         let consoleLogStub = sinon.stub( console, 'log' );
 
-        proxyquire( MODULE_PATH, {
+        proxyquire( '../../bin/jwtgen', {
 
             'yargs': yargsStub
         });
@@ -426,7 +384,7 @@ describe( MODULE_PATH, function() {
 
         let consoleLogStub = sinon.stub( console, 'log' );
 
-        proxyquire( MODULE_PATH, {
+        proxyquire( '../../bin/jwtgen', {
 
             'yargs': yargsStub
         });
@@ -440,33 +398,27 @@ describe( MODULE_PATH, function() {
 
     it( 'error: invalid header', function() {
 
+        let header = 'noEqualsSign';
+
         yargsStub.argv = {
 
             a: 'HS256',
             s: 'my-secret',
-            h: 'noEqualsSign'
+            h: header
         };
 
-        try {
+        let consoleErrorStub = sinon.stub( console, 'error' );
 
-            sinon.stub( console, 'error' ); // makes output more elegant
+        proxyquire( '../../bin/jwtgen', {
 
-            proxyquire( MODULE_PATH, {
+            'yargs': yargsStub
+        });
 
-                'yargs': yargsStub
-            });
+        console.error.restore();
 
-            throw new Error( 'error should have been thrown when the invalid header could not be parsed' );
-        }
-        catch( err ) {
-
-            console.error.restore();
-
-            expect( err.name ).to.equal( 'TypeError' );
-            expect( err.message ).to.equal( "Cannot read property 'trim' of undefined" );
-            expect( yargsStub.showHelp.calledOnce ).to.be.true;
-            expect( processExitStub.withArgs( 1 ).calledOnce ).to.be.true;
-        }
+        expect( consoleErrorStub.withArgs( 'invalid header: ' + header ).calledOnce ).to.be.true;
+        expect( yargsStub.showHelp.calledOnce ).to.be.true;
+        expect( processExitStub.withArgs( 1 ).calledOnce ).to.be.true;
     });
 
     afterEach( function() {
