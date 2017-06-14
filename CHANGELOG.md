@@ -1,6 +1,6 @@
 # Change Log
 
-## 2.1.1 (2017-5-11)
+## 2.2.0 (2017-06-14)
 
 ### Fixes:
 
@@ -9,8 +9,8 @@
 ### Internal:
 
 * Better error handling
-
 * Tests use actual private key file
+* Updated dependencies
 
 ## 2.1.0 (2017-04-19)
 
