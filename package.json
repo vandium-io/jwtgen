@@ -29,14 +29,14 @@
   "dependencies": {
     "jwt-builder": "^1.1.0",
     "lodash": "^4.6.1",
-    "yargs": "^4.2.0"
+    "yargs": "^8.0.2"
   },
   "devDependencies": {
     "app-root-path": "^2.0.1",
-    "chai": "^3.5.0",
+    "chai": "^4.0.2",
     "istanbul": "^0.4.3",
     "mocha": "^3.2.0",
     "proxyquire": "^1.7.10",
-    "sinon": "^1.17.3"
+    "sinon": "^2.3.4"
   }
 }
