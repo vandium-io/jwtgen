@@ -144,7 +144,14 @@ function buildHeaders() {
             throw new Error( 'invalid header: ' + header );
         }
 
-        headers[ parts[0].trim() ] = parts[1].trim();
+        try {
+
+            headers[ parts[0].trim() ] = JSON.parse( parts[1].trim() );
+        }
+        catch( e ) {
+
+            headers[ parts[0].trim() ] = parts[1].trim();
+        }
     });
 
     return headers;

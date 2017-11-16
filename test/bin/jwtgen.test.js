@@ -396,6 +396,52 @@ describe( 'bin/jwtgen', function() {
         expect( token.headers.kid ).to.equal( '2016-11-17' );
     });
 
+    it( 'header that is an array', function() {
+
+        yargsStub.argv = {
+
+            a: 'HS256',
+            s: 'my-secret',
+            h: 'roles=["ROLE_ADMIN","ROLE_USER"]'
+        };
+
+        let consoleLogStub = sinon.stub( console, 'log' );
+
+        proxyquire( '../../bin/jwtgen', {
+
+            'yargs': yargsStub
+        });
+
+        console.log.restore();
+
+        let token = decodeToken( consoleLogStub.firstCall.args[ 0 ] );
+
+        expect( token.headers.roles ).to.eql( [ "ROLE_ADMIN", "ROLE_USER" ] );
+    });
+
+    it( 'claim that is an object', function() {
+
+        yargsStub.argv = {
+
+            a: 'HS256',
+            s: 'my-secret',
+            h: 'roles={"type":"ROLE_ADMIN","name":"myRole"}'
+        };
+
+        let consoleLogStub = sinon.stub( console, 'log' );
+
+        proxyquire( '../../bin/jwtgen', {
+
+            'yargs': yargsStub
+        });
+
+        console.log.restore();
+
+        let token = decodeToken( consoleLogStub.firstCall.args[ 0 ] );
+
+        expect( token.headers.roles ).to.eql( { "type": "ROLE_ADMIN", "name": "myRole" } );
+    });
+
     it( 'error: invalid header', function() {
 
         let header = 'noEqualsSign';

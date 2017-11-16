@@ -1,5 +1,11 @@
 # Change Log
 
+## 2.3.0 (2017-11-16)
+
+### New:
+
+* Added support for array and object headers
+
 ## 2.2.0 (2017-06-14)
 
 ### Fixes:
